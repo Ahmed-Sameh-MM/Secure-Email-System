@@ -1,40 +1,35 @@
 from hashlib import sha256
 
 from static_data.constants import *
+from utils.utils import Utils
 
 
 class Hash:
-    def __init__(self, plain_text: str = None):
-        if plain_text is not None:
-            self.plainText = plain_text
+    def __init__(self, plain_text_path: str = None):
+        if plain_text_path is not None:
+            self.plainText = Utils.read_file(
+                file_path=plain_text_path,
+            )
 
         else:
-            self.plainText = self.__read_file()
-
-        self.hashText = str()
+            self.plainText = Utils.read_file()
 
         self.hash = sha256()
 
-    @staticmethod
-    def __read_file(file_path: str = PLAIN_TEXT_FILE_PATH) -> str:
-        try:
-            with open(file_path, 'r') as file:
-                contents = file.read()
-                return contents
-        except FileNotFoundError:
-            print(f"File not found: {file_path}")
-            return ''
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return ''
-
-    def write_hash_text_to_file(self):
-        self.__generate_hash_text()
-
-        with open(HASH_FILE_PATH, 'w') as file:
-            file.write(self.hashText)
-
-    def __generate_hash_text(self):
+    def generate_hash_text(self) -> str:
         self.hash.update(self.plainText.encode())
 
-        self.hashText = self.hash.hexdigest()
+        return self.hash.hexdigest()
+
+    @staticmethod
+    def verify_hash(sender_hash: str) -> bool:
+        h = Hash(
+            plain_text_path=DECRYPTED_TEXT_FILE_PATH,
+        )
+
+        hashText = h.generate_hash_text()
+
+        if sender_hash == hashText:
+            return True
+
+        return False

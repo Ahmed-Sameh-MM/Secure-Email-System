@@ -1,13 +1,42 @@
 from src.encryption import Encryption
 from src.hash import Hash
+from src.digital_signature import DigitalSignature
+from model_classes.security_info import SecurityInfo
+from utils.utils import Utils
+
 from static_data.constants import *
 
 if __name__ == '__main__':
-    h = Hash()
+    # Sender Side
 
-    h.write_hash_text_to_file()
+    hashText = Hash().generate_hash_text()
 
     key = b"1234567812345678"
     Encryption().encrypt_file(key, PLAIN_TEXT_FILE_PATH, CIPHER_TEXT_FILE_PATH)
 
-    # Encryption().decrypt_file(key, CIPHER_TEXT_FILE_PATH, DECRYPTED_TEXT_FILE_PATH)
+    publicKey, digitalSignature = DigitalSignature().get_signature()
+
+    senderSecurityInfo = SecurityInfo(
+        hash_text=hashText,
+        public_key=publicKey,
+        digital_signature=digitalSignature,
+    )
+
+    Utils.write_security_info_file(
+        security_info=senderSecurityInfo,
+    )
+
+    # Receiver Side
+
+    Encryption().decrypt_file(key, CIPHER_TEXT_FILE_PATH, DECRYPTED_TEXT_FILE_PATH)
+
+    receiverSecurityInfo = Utils.read_security_info_file()
+
+    print(Hash.verify_hash(
+        sender_hash=receiverSecurityInfo.hashText,
+    ))
+
+    print(DigitalSignature.verify_sender_signature(
+        public_key_string=receiverSecurityInfo.publicKey,
+        sender_signature=receiverSecurityInfo.digitalSignature,
+    ))

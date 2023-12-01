@@ -1,5 +1,3 @@
-import os
-
 from Crypto.Cipher import AES
 from static_data.constants import *
 
@@ -7,7 +5,7 @@ from static_data.constants import *
 class Encryption:
     @staticmethod
     def encrypt_file(key, in_filename: str = PLAIN_TEXT_FILE_PATH, out_filename: str = CIPHER_TEXT_FILE_PATH, chunk_size: int = 16):
-        """ Encrypts a file using AES (CBC mode) with the given key.
+        """ Encrypts a file using AES (ECB mode) with the given key.
         key: The encryption key - a string that must be either 16, 24 or 32 bytes long. Longer keys are more secure.
         in_filename:Name of the input file
         out_filename: If None, CIPHER_TEXT_FILE_PATH will be used.
@@ -15,7 +13,6 @@ class Encryption:
         """
 
         encryptor = AES.new(key, AES.MODE_ECB)
-        file_size = os.path.getsize(in_filename)
 
         with open(in_filename, 'rb') as infile:
             with open(out_filename, 'wb') as outfile:
@@ -30,7 +27,7 @@ class Encryption:
 
     @staticmethod
     def decrypt_file(key, in_filename: str = CIPHER_TEXT_FILE_PATH, out_filename: str = DECRYPTED_TEXT_FILE_PATH, chunk_size: int = 16):
-        """ Decrypts a file using AES (CBC mode) with the
+        """ Decrypts a file using AES (ECB mode) with the
         given key. Parameters are similar to encrypt_file.
         """
 
@@ -42,4 +39,9 @@ class Encryption:
                     if len(chunk) == 0:
                         break
 
-                    outfile.write(decryptor.decrypt(chunk))
+                    decryptedString = decryptor.decrypt(chunk).decode('utf-8')
+
+                    # Remove the spaces at the end of the string
+                    decryptedString = decryptedString.rstrip()
+
+                    outfile.write(decryptedString.encode())
