@@ -16,28 +16,25 @@ class DigitalSignature:
     @staticmethod
     def __generate_rsa_key_pair():
         private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
-            backend=default_backend()
+            public_exponent=65537, key_size=2048, backend=default_backend()
         )
 
         public_key = private_key.public_key()
 
         return private_key, public_key
 
-    def get_signature(self) -> tuple[str, str]:
-        plainText = Utils.read_file()
+    def get_signature(self, plain_text_file_path) -> tuple[str, str]:
+        plainText = Utils.read_file(plain_text_file_path)
 
         signature = self.privateKey.sign(
-            plainText.encode('utf-8'),
+            plainText.encode("utf-8"),
             padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
+                mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH
             ),
             hashes.SHA256(),
         )
 
-        signature = base64.b64encode(signature).decode('utf-8')
+        signature = base64.b64encode(signature).decode("utf-8")
 
         publicKeyString = self.publicKey.public_bytes(
             encoding=serialization.Encoding.PEM,
@@ -47,14 +44,16 @@ class DigitalSignature:
         return publicKeyString, signature
 
     @staticmethod
-    def verify_sender_signature(public_key_string: str, sender_signature: str) -> bool:
+    def verify_sender_signature(
+        public_key_string: str, sender_signature: str, decrypted_file_path
+    ) -> bool:
         plain_text = Utils.read_file(
-            file_path=DECRYPTED_TEXT_FILE_PATH,
+            file_path=decrypted_file_path,
         )
 
         signature = base64.b64decode(sender_signature)
 
-        publicKeyBytes = public_key_string.encode('utf-8')
+        publicKeyBytes = public_key_string.encode("utf-8")
 
         # Deserialize the PEM-encoded public key
         publicKey = serialization.load_pem_public_key(
@@ -65,10 +64,10 @@ class DigitalSignature:
         try:
             publicKey.verify(
                 signature,
-                plain_text.encode('utf-8'),
+                plain_text.encode("utf-8"),
                 padding.PSS(
                     mgf=padding.MGF1(hashes.SHA256()),
-                    salt_length=padding.PSS.MAX_LENGTH
+                    salt_length=padding.PSS.MAX_LENGTH,
                 ),
                 hashes.SHA256(),
             )

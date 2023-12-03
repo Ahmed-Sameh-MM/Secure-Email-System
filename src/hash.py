@@ -1,6 +1,4 @@
 from hashlib import sha256
-
-from static_data.constants import *
 from utils.utils import Utils
 
 
@@ -22,9 +20,9 @@ class Hash:
         return self.hash.hexdigest()
 
     @staticmethod
-    def verify_hash(sender_hash: str) -> bool:
+    def verify_hash(sender_hash: str, decrypted_text_file_path) -> bool:
         h = Hash(
-            plain_text_path=DECRYPTED_TEXT_FILE_PATH,
+            plain_text_path=decrypted_text_file_path,
         )
 
         hashText = h.generate_hash_text()

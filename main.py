@@ -6,7 +6,7 @@ from utils.utils import Utils
 
 from static_data.constants import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Sender Side
 
     hashText = Hash().generate_hash_text()
@@ -14,7 +14,9 @@ if __name__ == '__main__':
     key = b"1234567812345678"
     Encryption().encrypt_file(key, PLAIN_TEXT_FILE_PATH, CIPHER_TEXT_FILE_PATH)
 
-    publicKey, digitalSignature = DigitalSignature().get_signature()
+    publicKey, digitalSignature = DigitalSignature().get_signature(
+        plain_text_file_path=PLAIN_TEXT_FILE_PATH
+    )
 
     senderSecurityInfo = SecurityInfo(
         hash_text=hashText,
@@ -30,13 +32,19 @@ if __name__ == '__main__':
 
     Encryption().decrypt_file(key, CIPHER_TEXT_FILE_PATH, DECRYPTED_TEXT_FILE_PATH)
 
-    receiverSecurityInfo = Utils.read_security_info_file()
+    receiverSecurityInfo = Utils.read_security_info_file(SECURITY_INFO_FILE_PATH)
 
-    print(Hash.verify_hash(
-        sender_hash=receiverSecurityInfo.hashText,
-    ))
+    print(
+        Hash.verify_hash(
+            sender_hash=receiverSecurityInfo.hashText,
+            decrypted_text_file_path=DECRYPTED_TEXT_FILE_PATH,
+        )
+    )
 
-    print(DigitalSignature.verify_sender_signature(
-        public_key_string=receiverSecurityInfo.publicKey,
-        sender_signature=receiverSecurityInfo.digitalSignature,
-    ))
+    print(
+        DigitalSignature.verify_sender_signature(
+            public_key_string=receiverSecurityInfo.publicKey,
+            sender_signature=receiverSecurityInfo.digitalSignature,
+            decrypted_file_path=DECRYPTED_TEXT_FILE_PATH,
+        )
+    )
