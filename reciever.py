@@ -66,13 +66,11 @@ class Handler_Class(object):
                         security_info_path = save_path
 
                     elif attachment.FileName.endswith(".txt"):
-                        fileToDecrypt = attachment.FileName
+                        fileToDecrypt = save_path
 
                 print("Decrypting file")
 
-                Encryption().decrypt_file(
-                    key, "attachments/" + fileToDecrypt, DECRYPTED_TEXT_FILE_PATH
-                )
+                Encryption().decrypt_file(key, fileToDecrypt, DECRYPTED_TEXT_FILE_PATH)
                 print("File Decrypted Successfully")
 
                 receiverSecurityInfo = Utils.read_security_info_file(security_info_path)
@@ -91,8 +89,6 @@ class Handler_Class(object):
                         decrypted_file_path=DECRYPTED_TEXT_FILE_PATH,
                     )
                 )
-
-                print("\n")
 
 
 def client_program():
