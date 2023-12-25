@@ -51,41 +51,36 @@ class ClientThread(threading.Thread):
             to = input("To: ")
             subject = input("Subject: ")
             body = input("Body: ")
-            attachments_paths = input("Attachments path: ")
+            attachments_paths = input("Attachment path: ")
             attachments_paths = attachments_paths.split(" ")
 
+            attachments_to_send = []
+
+            for i in range(len(attachments_paths)):
+                Encryption().encrypt_file(
+                    key, attachments_paths[i], "cipher_text" + str(i) + ".txt"
+                )
+                attachments_to_send.append("cipher_text" + str(i) + ".txt")
+
             hashText = Hash(plain_text_path=attachments_paths[0]).generate_hash_text()
-            Encryption().encrypt_file(key, attachments_paths[0], CIPHER_TEXT_FILE_PATH)
-            print("1")
+
             publicKey, digitalSignature = DigitalSignature().get_signature(
                 attachments_paths[0]
             )
-            print("2")
+
             senderSecurityInfo = SecurityInfo(
                 hash_text=hashText,
                 public_key=publicKey,
                 digital_signature=digitalSignature,
             )
-            print("3")
+
             Utils.write_security_info_file(
                 security_info=senderSecurityInfo,
             )
-            print("4")
-            attachments_paths = []
-            attachments_paths.append(CIPHER_TEXT_FILE_PATH)
-            attachments_paths.append(SECURITY_INFO_FILE_PATH)
 
-            attachments_paths = " ".join(attachments_paths)
+            attachments_to_send.append(SECURITY_INFO_FILE_PATH)
 
-            j = {
-                "to": to,
-                "subject": subject,
-                "body": body,
-                "attachments_paths": attachments_paths,
-            }
-            send_email(
-                j["to"], j["subject"], j["body"], str(j["attachments_paths"]).split(" ")
-            )
+            send_email(to, subject, body, attachments_to_send)
 
             self.csocket.send("EmailSent".encode())
 

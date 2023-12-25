@@ -42,12 +42,12 @@ class Handler_Class(object):
             mail = self.Session.GetItemFromID(ID)
 
             print("Subject:", mail.Subject)
-            print("Sender:", mail.SenderName)
-            print("Received Time:", mail.ReceivedTime)
-            print("Body:", mail.Body)
-            print("id:", mail.EntryID)
+            # print("Sender:", mail.SenderName)
+            # print("Received Time:", mail.ReceivedTime)
+            # print("Body:", mail.Body)
+            # print("id:", mail.EntryID)
 
-            fileToDecrypt = ""
+            filesToDecrypt = []
             # Check for attachments
             if mail.Attachments.Count > 0:
                 print("Attachments:")
@@ -66,14 +66,16 @@ class Handler_Class(object):
                         security_info_path = save_path
 
                     elif attachment.FileName.endswith(".txt"):
-                        fileToDecrypt = attachment.FileName
+                        filesToDecrypt.append(attachment.FileName)
 
-                print("Decrypting file")
-
-                Encryption().decrypt_file(
-                    key, "attachments/" + fileToDecrypt, DECRYPTED_TEXT_FILE_PATH
-                )
-                print("File Decrypted Successfully")
+                print("Decrypting file(s)")
+                for i in range(len(filesToDecrypt)):
+                    Encryption().decrypt_file(
+                        key,
+                        "attachments/" + filesToDecrypt[i],
+                        "attachments/decrypted_text" + str(i) + ".txt",
+                    )
+                print("File(s) Decrypted Successfully")
 
                 receiverSecurityInfo = Utils.read_security_info_file(security_info_path)
 
@@ -91,8 +93,6 @@ class Handler_Class(object):
                         decrypted_file_path=DECRYPTED_TEXT_FILE_PATH,
                     )
                 )
-
-                print("\n")
 
 
 def client_program():
